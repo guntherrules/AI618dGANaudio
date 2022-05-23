@@ -18,7 +18,7 @@ Handles transformations between waveforms, stfts, spectrograms,
 mel-spectrograms, and instantaneous frequency (specgram).
 """
 
-import spectral_ops
+import lib.spectral_ops as spectral_ops
 import numpy as np
 import tensorflow.compat.v1 as tf
 
