@@ -6,11 +6,12 @@ import scipy.io.wavfile as wavf
 import tensorflow as tf
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
 mpl.rc('axes', labelsize=14)
 mpl.rc('xtick', labelsize=12)
 mpl.rc('ytick', labelsize=12)
-mpl.rc('legend',fontsize= 12)
-mpl.rc('axes', titlesize= 14)
+mpl.rc('legend', fontsize=12)
+mpl.rc('axes', titlesize=14)
 
 source = os.getcwd()
 path = '../data/nsynth-test.tfrecord'
@@ -21,7 +22,7 @@ nsynth = NSynthDataset(path)
 dataset = nsynth.get_dataset()
 
 specgramhelper = spec.SpecgramsHelper(audio_length=64000,
-                                      spec_shape=513,
+                                      spec_shape=512,
                                       window_length=1024,
                                       sample_rate=16000,
                                       mel_downscale=1,

@@ -46,7 +46,7 @@ def linear_to_mel_weight_matrix(num_mel_bins=20,
                                 num_spectrogram_bins=129,
                                 sample_rate=16000,
                                 lower_edge_hertz=125.0,
-                                upper_edge_hertz=3800.0):
+                                upper_edge_hertz=8000.0):
   """Returns a matrix to warp linear scale spectrograms to the mel scale.
 
   Adapted from tf.signal.linear_to_mel_weight_matrix with a minimum

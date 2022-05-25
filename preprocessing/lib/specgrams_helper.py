@@ -43,11 +43,11 @@ class SpecgramsHelper(object):
   def _get_symmetric_nfft_nhop(self):
     n_freq_bins = self._spec_shape
     # Power of two only has 1 nonzero in binary representation
-    is_power_2 = bin(n_freq_bins-1).count('1') == 1
+    is_power_2 = bin(n_freq_bins).count('1') == 1
     if not is_power_2:
       raise ValueError('Wrong spec_shape. Number of frequency bins must be '
                        'a power of 2 plus 1, not %d' % n_freq_bins)
-    nfft = (n_freq_bins-1) * 2
+    nfft = n_freq_bins * 2
     nhop = int(2 * (self._audio_length - self._window_length) / nfft)
     return (nfft, nhop)
 
@@ -66,7 +66,7 @@ class SpecgramsHelper(object):
         frame_length=self._nfft,
         frame_step=self._nhop,
         fft_length=self._nfft,
-        pad_end=False)
+        pad_end=False)[1:, 1:]
     stft_shape = stft.get_shape()
 
     if stft_shape[0] != self._spec_shape:
@@ -84,7 +84,7 @@ class SpecgramsHelper(object):
     Returns:
       wave: Tensor of the waveform, shape [time].
     """
-
+    stft = tf.pad(stft, [[1, 0], [1, 0]])
     wave_resyn = tf.signal.inverse_stft(
         stfts=stft,
         frame_length=self._window_length,
@@ -141,7 +141,7 @@ class SpecgramsHelper(object):
 
   def _linear_to_mel_matrix(self):
     """Get the mel transformation matrix."""
-    num_freq_bins = self._nfft // 2 + 1
+    num_freq_bins = self._nfft // 2
     lower_edge_hertz = 0.0
     upper_edge_hertz = self._sample_rate / 2.0
     num_mel_bins = num_freq_bins // self._mel_downscale
