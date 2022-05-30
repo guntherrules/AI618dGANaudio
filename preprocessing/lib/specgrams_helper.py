@@ -37,12 +37,13 @@ class SpecgramsHelper(object):
     self._nfft, self._nhop = self._get_symmetric_nfft_nhop
     self._eps = 1.0e-6
     # Normalization constants
-    self._a, self._b = self.compute_normalization()
+    self._a, self._b = self._normalization_parameters()
 
   def _safe_log(self, x):
     return tf.log(x + self._eps)
 
   def _get_symmetric_nfft_nhop(self):
+    """Adjust nfft and nhop for the stft such that the resulting spectogram is symmetric"""
     n_freq_bins = self._spec_shape
     # Power of two only has 1 nonzero in binary representation
     is_power_2 = bin(n_freq_bins).count('1') == 1
@@ -214,12 +215,21 @@ class SpecgramsHelper(object):
         [logmag[:, :, tf.newaxis], p[:, :, tf.newaxis]], axis=-1)
 
   def normalize_to_tanh(self, input_value_range):
+    """Normalize input to range of tanh
+
+    Args:
+      input_value_range: tuple of min and max of input range
+
+    Returns:
+      a,b: linear transformation parameters for normalization
+    """
     input_interval = float(input_value_range[1] - input_value_range[0])
     a = 2.0 / input_interval
     b = - 2.0 * input_value_range[0] / input_interval - 1.0
     return a, b
 
   def compute_normalization(self):
+    """Compute global normalization parameters using the global min and max value of magnitude and phase"""
     mag_a, mag_b = self.normalize_to_tanh((-13.815511, 10.17237))
     p_a, p_b = self.normalize_to_tanh((-2.6498687, 2.6647818))
     return [mag_a, p_a], [mag_b, p_b]
@@ -231,6 +241,7 @@ class SpecgramsHelper(object):
     return tf.clip_by_value(a * melspecgram + b, -1.0, 1.0)
 
   def normalized_melspecgram_to_melspecgram(self, normalized_specgram):
+    """Compute normalized melspecgram"""
     a = tf.constant(self._a, dtype=normalized_specgram.dtype)
     b = tf.constant(self._b, dtype=normalized_specgram.dtype)
     return (normalized_specgram - b)/a
