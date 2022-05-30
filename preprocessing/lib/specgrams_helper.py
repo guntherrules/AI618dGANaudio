@@ -34,7 +34,7 @@ class SpecgramsHelper(object):
     self._sample_rate = sample_rate
     self._mel_downscale = mel_downscale
     self._ifreq = ifreq
-    self._nfft, self._nhop = self._get_symmetric_nfft_nhop
+    self._nfft, self._nhop = self._get_symmetric_nfft_nhop()
     self._eps = 1.0e-6
     # Normalization constants
     self._a, self._b = self._normalization_parameters()
@@ -228,7 +228,7 @@ class SpecgramsHelper(object):
     b = - 2.0 * input_value_range[0] / input_interval - 1.0
     return a, b
 
-  def compute_normalization(self):
+  def _normalization_parameters(self):
     """Compute global normalization parameters using the global min and max value of magnitude and phase"""
     mag_a, mag_b = self.normalize_to_tanh((-13.815511, 10.17237))
     p_a, p_b = self.normalize_to_tanh((-2.6498687, 2.6647818))
