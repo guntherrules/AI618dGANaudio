@@ -27,15 +27,17 @@ class SpecgramsHelper(object):
   """Helper functions to compute specgrams."""
 
   def __init__(self, audio_length, spec_shape, window_length,
-               sample_rate, mel_downscale, ifreq=True, discard_dc=True):
+               sample_rate, mel_downscale, ifreq=True):
     self._audio_length = audio_length
     self._spec_shape = spec_shape
     self._window_length = window_length
     self._sample_rate = sample_rate
     self._mel_downscale = mel_downscale
     self._ifreq = ifreq
-    self._nfft, self._nhop = self._get_symmetric_nfft_nhop()
+    self._nfft, self._nhop = self._get_symmetric_nfft_nhop
     self._eps = 1.0e-6
+    # Normalization constants
+    self._a, self._b = self.compute_normalization()
 
   def _safe_log(self, x):
     return tf.log(x + self._eps)
@@ -60,7 +62,6 @@ class SpecgramsHelper(object):
     Returns:
       stft: Complex64 tensor of stft, shape [time, freq].
     """
-    #wave = tf.reshape(wave, (1, len(wave)))
     stft = tf.signal.stft(
         wave,
         frame_length=self._nfft,
@@ -212,6 +213,28 @@ class SpecgramsHelper(object):
     return tf.concat(
         [logmag[:, :, tf.newaxis], p[:, :, tf.newaxis]], axis=-1)
 
+  def normalize_to_tanh(self, input_value_range):
+    input_interval = float(input_value_range[1] - input_value_range[0])
+    a = 2.0 / input_interval
+    b = - 2.0 * input_value_range[0] / input_interval - 1.0
+    return a, b
+
+  def compute_normalization(self):
+    mag_a, mag_b = self.normalize_to_tanh((-13.815511, 10.17237))
+    p_a, p_b = self.normalize_to_tanh((-2.6498687, 2.6647818))
+    return [mag_a, p_a], [mag_b, p_b]
+
+  def melspecgram_to_normalized_melspecgram(self, melspecgram):
+    """Normalize values to range of -1 to 1"""
+    a = tf.constant(self._a, dtype=melspecgram.dtype)
+    b = tf.constant(self._b, dtype=melspecgram.dtype)
+    return tf.clip_by_value(a * melspecgram + b, -1.0, 1.0)
+
+  def normalized_melspecgram_to_melspecgram(self, normalized_specgram):
+    a = tf.constant(self._a, dtype=normalized_specgram.dtype)
+    b = tf.constant(self._b, dtype=normalized_specgram.dtype)
+    return (normalized_specgram - b)/a
+
   def stft_to_melspecgram(self, stft):
     """Converts stft to mel-spectrogram."""
     return self.specgram_to_melspecgram(self.stft_to_specgram(stft))
@@ -235,3 +258,11 @@ class SpecgramsHelper(object):
   def melspecgram_to_wave(self, melspecgram):
     """Converts mel-spectrogram to stft."""
     return self.stft_to_wave(self.melspecgram_to_stft(melspecgram))
+
+  def wave_to_normalized_melspecgram(self, wave):
+    """Converts wave to normalized melspecgram"""
+    return self.melspecgram_to_normalized_melspecgram(self.wave_to_melspecgram(wave))
+
+  def normalized_melspecgram_to_wave(self, normalized_melspecgram):
+    """Converts normalized melspecgram to wave"""
+    return self.melspecgram_to_wave(self.normalized_melspecgram_to_melspecgram(normalized_melspecgram))
