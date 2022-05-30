@@ -1,7 +1,12 @@
 import tensorflow as tf
+import glob
+from torch.utils.data import Dataset
+from lib import specgrams_helper as spec
+import pandas as pd
+import os
 
 class NSynthDataset(object):
-    """Dataset object to help manage the TFRecord loading."""
+    """Object to help manage the TFRecord loading."""
 
     def __init__(self, tfrecord_path):
         self.record_path = tfrecord_path
@@ -28,3 +33,57 @@ class NSynthDataset(object):
     def get_dataset(self):
         raw_dataset = tf.data.TFRecordDataset([self.record_path])
         return raw_dataset.map(self.parse)
+
+class NSynthDatasetTorch(Dataset):
+    """Pytorch dataset object for loading nsynth dataset or subset"""
+
+    def __init__(self, select, path, label, spec_shape=256):
+        self.paths = self.get_selection(select, path)
+        self.spec_shape = spec_shape
+        self.label = label
+        self.specgrams_helper = spec.SpecgramsHelper(audio_length=64000,
+                                                  spec_shape=spec_shape,
+                                                  window_length=spec_shape*2,
+                                                  sample_rate=16000,
+                                                  mel_downscale=1,
+                                                  ifreq=False,
+                                                  )
+
+    def __len__(self):
+        return len(self.paths)
+
+    def __getitem__(self, idx):
+        path = self.paths[idx]
+        sample = pd.read_feather(path)
+        audio = sample['audio'][0]
+        melspec = self.specgrams_helper.wave_to_normalized_melspecgram(audio).numpy()
+        #print(type(melspec.numpy()))
+        if self.label == 'instrument_family':
+            label = os.path.basename(path).split('_')[0]
+        elif self.label == 'pitch':
+            label = path.split('_')[2].split('-')[0]
+        return melspec, label
+
+    def get_selection(self, select, path):
+        """Select a subset of filenames from nsynth dataset
+
+        Args:
+            select: dictionary of subset properties like pitchrange, instrument_name etc
+            path: path to the audio files
+
+        Returns:
+            list or filenames in the subset
+        """
+        search_str = path
+        for key in select.keys():
+            if select[key] == None:
+                search_str += '*'
+            else:
+                search_str += select[key]
+            if key in ['instrument_name', 'pitch_range']:
+                search_str += '-'
+            elif key != 'qualities':
+                search_str += '_'
+            else:
+                search_str += '.feather'
+        return glob.glob(search_str)
