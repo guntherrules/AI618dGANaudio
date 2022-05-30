@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from data_reader import NSynthDataset
+from lib.data_reader import NSynthDataset
 import os
 import tensorflow as tf
 
