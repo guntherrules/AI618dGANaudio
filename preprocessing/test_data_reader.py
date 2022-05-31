@@ -1,4 +1,5 @@
-from lib import data_reader
+from lib import dataset
+import numpy as np
 from torch.utils.data import DataLoader
 
 select = {'instrument_family_str': None,
@@ -9,15 +10,17 @@ select = {'instrument_family_str': None,
           'qualities': None}
 path = '../data/train/'
 
-torchDataset_pitch = data_reader.NSynthDatasetTorch(select, path, label='pitch')
-torchDataset_family = data_reader.NSynthDatasetTorch(select, path, label='instrument_family')
+torchDataset = dataset.MultiResolutionDataset(select, path, resolution=8)
+train_dataloader = DataLoader(torchDataset, batch_size=64, shuffle=True)
+train_features = next(iter(train_dataloader))
+print(train_features.size())
 
-train_dataloader = DataLoader(torchDataset_pitch, batch_size=64, shuffle=True)
+torchDataset = dataset.MultiLabelResolutionDataset(select, path, resolution=8)
+train_dataloader = DataLoader(torchDataset, batch_size=64, shuffle=True)
+train_features = next(iter(train_dataloader))
+print(train_features[0].size(), train_features[1:])
 
-train_features, train_labels = next(iter(train_dataloader))
-print(train_features, train_labels)
-
-train_dataloader = DataLoader(torchDataset_family, batch_size=64, shuffle=True)
-
-train_features, train_labels = next(iter(train_dataloader))
-print(train_features, train_labels)
+torchDataset = dataset.MultiLabelAllDataset(select, path, resolution=8)
+train_dataloader = DataLoader(torchDataset, batch_size=64, shuffle=True)
+train_features = next(iter(train_dataloader))
+print(train_features[0].size(), train_features[1:])

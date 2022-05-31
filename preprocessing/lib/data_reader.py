@@ -48,6 +48,7 @@ class NSynthDatasetTorch(Dataset):
                                                   mel_downscale=1,
                                                   ifreq=False,
                                                   )
+        #self.transform = transform()
 
     def __len__(self):
         return len(self.paths)
