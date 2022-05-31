@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 select = {'instrument_family_str': None,
           'instrument_source_str': 'acoustic',
           'instrument_name': None,
-          'pitch_range': '0[3-8]4',
+          'pitch_range': '0[2-8]4',
           'velocity': None,
           'qualities': None}
 path = '../data/train/'
