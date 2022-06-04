@@ -83,7 +83,7 @@ class MultiLabelResolutionDataset(Dataset):
         self.transform = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.RandomHorizontalFlip(),
+                #transforms.RandomHorizontalFlip(),
                 #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True),
             ]
         )
@@ -103,7 +103,6 @@ class MultiLabelResolutionDataset(Dataset):
         sample = pd.read_feather(path)
         audio = sample['audio'][0]
         melspec = self.specgrams_helper.wave_to_normalized_melspecgram(audio).numpy()
-        melspec = np.transpose(melspec, (2, 0, 1))
         melspec = self.transform(melspec)
         label_org = self.attributes[index]
         label_trg = self.att2[index]
