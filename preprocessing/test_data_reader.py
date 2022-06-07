@@ -8,12 +8,13 @@ select = {'instrument_family_str': None,
           'pitch_range': '0[2-8]4',
           'velocity': None,
           'qualities': None}
-path = '../data/train/'
+
+path = '../data/train_subset'
 
 torchDataset = dataset.MultiResolutionDataset(select, path, resolution=8)
-train_dataloader = DataLoader(torchDataset, batch_size=64, shuffle=True)
+train_dataloader = DataLoader(torchDataset, batch_size=1, shuffle=True)
 train_features = next(iter(train_dataloader))
-print(train_features.size())
+print(train_features.size(), train_features)
 
 torchDataset = dataset.MultiLabelResolutionDataset(select, path, resolution=8)
 train_dataloader = DataLoader(torchDataset, batch_size=64, shuffle=True)
