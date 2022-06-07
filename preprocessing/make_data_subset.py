@@ -11,12 +11,12 @@ select = {'instrument_family_str': None,
           'qualities': None}
 load_path = '../data/train'
 save_path = '../data/train_subset'
-size = len(get_selection(select, load_path))
+size = len(get_selection(select, load_path, 'feather'))
 
 torchDataset = dataset.RawDataset(select, load_path, resolution=8)
 for idx in range(torchDataset.__len__()):
     sample = torchDataset.__getitem__(idx)
     filename = sample[1].replace(load_path, save_path)
-    specgram = sample[0].numpy()
+    specgram = sample[0]
     np.save(filename, specgram)
     print(idx/size)
