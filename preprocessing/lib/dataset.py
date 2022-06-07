@@ -23,7 +23,7 @@ def get_selection(select, path):
     Returns:
         list or filenames in the subset
     """
-    search_str = path
+    search_str = path + '/'
     for key in select.keys():
         if select[key] == None:
             search_str += '*'
@@ -37,9 +37,40 @@ def get_selection(select, path):
             search_str += '.feather'
     return glob.glob(search_str)
 
+class RawDataset(Dataset):
+    """Pytorch dataset object for loading raw (i.e. audio format) nsynth dataset or subset"""
+
+    def __init__(self, select, path, resolution=256):
+        self.audiolist = get_selection(select, path)
+        self.resolution = resolution
+        self.transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                #transforms.RandomHorizontalFlip(),
+                #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True),
+            ]
+        )
+        self.specgrams_helper = spec.SpecgramsHelper(audio_length=64000,
+                                                     spec_shape=resolution,
+                                                     window_length=resolution * 2,
+                                                     sample_rate=16000,
+                                                     mel_downscale=1,
+                                                     ifreq=True,
+                                                     )
+
+    def __len__(self):
+        return len(self.audiolist)
+
+    def __getitem__(self, idx):
+        path = self.audiolist[idx]
+        sample = pd.read_feather(path)
+        audio = sample['audio'][0]
+        melspec = self.specgrams_helper.wave_to_normalized_melspecgram(audio).numpy()
+        melspec = self.transform(melspec)
+        return melspec, path
 
 class MultiResolutionDataset(Dataset):
-    """Pytorch dataset object for loading nsynth dataset or subset"""
+    """Pytorch dataset object for loading processed (i.e. in melspec format) nsynth dataset or subset"""
 
     def __init__(self, select, path, resolution=256):
         self.audiolist = get_selection(select, path)
@@ -67,7 +98,7 @@ class MultiResolutionDataset(Dataset):
         sample = pd.read_feather(path)
         audio = sample['audio'][0]
         melspec = self.specgrams_helper.wave_to_normalized_melspecgram(audio).numpy()
-        melspec = np.transpose(melspec, (2, 0, 1))
+        #melspec = np.transpose(melspec, (2, 0, 1))
         melspec = self.transform(melspec)
         return melspec
 
