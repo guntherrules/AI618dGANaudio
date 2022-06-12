@@ -208,6 +208,7 @@ class MultiLabelAllDataset(Dataset):
         self.plist = []
         self.imglist = []
         self.attributes = []
+        
         for i in range(len(spath)):
             style = os.listdir(spath[i])
             pix = os.listdir(ppath[i])
@@ -215,6 +216,7 @@ class MultiLabelAllDataset(Dataset):
             style.sort()
             pix.sort()
             imgs.sort()
+            
             for ii in range(len(style)):
                 self.slist.append(os.path.join(spath[i],style[ii]))
                 self.plist.append(os.path.join(ppath[i],pix[ii]))
@@ -226,16 +228,16 @@ class MultiLabelAllDataset(Dataset):
         self.imglist2,self.slist2,self.plist2, self.att2 = zip(*c)
         self.transform = transforms.Compose(
         [
-            transforms.Resize(resolution),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True),
+            transforms.Resize(resolution),
+            transforms.Normalize((0.5, 0.5), (0.5, 0.5), inplace=True),
         ])
     def __len__(self):
         return len(self.slist)
 
     def __getitem__(self, index):
         
-        img = Image.open(self.imglist[index])
+        img = np.load(self.imglist[index])
         sty = torch.load(self.slist[index])
         sty.requires_grad=False
         pix = torch.load(self.plist[index])
