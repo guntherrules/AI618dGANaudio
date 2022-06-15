@@ -23,7 +23,7 @@ output_path = os.path.join(source, 'test_output')
 
 nsynth = NSynthDataset(path)
 dataset = nsynth.get_dataset()
-spec_shape = 256
+spec_shape = 512
 specgramhelper = spec.SpecgramsHelper(audio_length=64000,
                                       spec_shape=spec_shape,
                                       window_length=spec_shape*2,
@@ -31,9 +31,8 @@ specgramhelper = spec.SpecgramsHelper(audio_length=64000,
                                       mel_downscale=1,
                                       ifreq=True,
                                       )
-path = '../data/train/'
+path = '../data/all_samples_512/train_512/'
 files = glob.glob(path + '*.feather')
-magmax, magmin, pmax, pmin = -100, 100, -100, 100
 print(len(files))
 random.seed(47)
 files_subset = random.sample(files, 50)
@@ -77,16 +76,6 @@ for file in files_subset:
 
     # Look at melspec
     melspec = specgramhelper.specgram_to_melspecgram(specgram)
-    print(np.max(melspec[:, :, 0]), np.min(melspec[:, :, 0]))
-    print(np.max(melspec[:, :, 1]), np.min(melspec[:, :, 1]), '\n')
-    if np.max(melspec[:,:,0])>magmax:
-        magmax = np.max(melspec[:,:,0])
-    if np.max(melspec[:,:,1])>pmax:
-        pmax = np.max(melspec[:,:,1])
-    if np.min(melspec[:,:,0])<magmin:
-        magmin = np.min(melspec[:,:,0])
-    if np.min(melspec[:,:,1])<pmin:
-        pmin = np.min(melspec[:,:,1])
     f, ax = plt.subplots(figsize=(8, 6))
     mesh = ax.pcolormesh(time, freq, tf.transpose(melspec[:, :, 0]).numpy(), cmap='viridis',
                   shading='auto')

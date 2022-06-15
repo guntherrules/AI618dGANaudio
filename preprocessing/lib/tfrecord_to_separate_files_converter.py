@@ -6,7 +6,7 @@ import os
 import tensorflow as tf
 
 class TfrecordConverter(object):
-    """Helper functions convert tensorflow dataset to feather files"""
+    """Helper functions convert tensorflow dataset to seperate feather files"""
 
     def __init__(self, raw_dataset_path, save_path):
         self.save_path = save_path

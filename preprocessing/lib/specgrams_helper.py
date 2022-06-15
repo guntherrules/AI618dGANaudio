@@ -1,3 +1,5 @@
+# Based on code from the Magenta Authors (see Copyright below)
+#
 # Copyright 2022 The Magenta Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +17,8 @@
 """Helper object for transforming audio to spectra.
 
 Handles transformations between waveforms, stfts, spectrograms,
-mel-spectrograms, and instantaneous frequency (specgram).
+mel-spectrograms, normalized mel-spectograms and
+instantaneous frequency (specgram).
 """
 
 import lib.spectral_ops as spectral_ops

@@ -1,3 +1,5 @@
+'''Script to get the global minimum and maximum of the melspec range for usage in normalizing the data'''
+
 from lib import specgrams_helper as spec
 import glob
 import pandas as pd
@@ -24,14 +26,14 @@ def get_value_range():
         audio = sample['audio'][0]
 
         melspec = specgramhelper.wave_to_melspecgram(audio)
-        if np.max(melspec[:,:,0])>magmax:
-            magmax = np.max(melspec[:,:,0])
-        if np.max(melspec[:,:,1])>pmax:
-            pmax = np.max(melspec[:,:,1])
-        if np.min(melspec[:,:,0])<magmin:
-            magmin = np.min(melspec[:,:,0])
-        if np.min(melspec[:,:,1])<pmin:
-            pmin = np.min(melspec[:,:,1])
+        if np.max(melspec[:, :, 0]) > magmax:
+            magmax = np.max(melspec[:, :, 0])
+        if np.max(melspec[:, :, 1]) > pmax:
+            pmax = np.max(melspec[:, :, 1])
+        if np.min(melspec[:, :, 0]) < magmin:
+            magmin = np.min(melspec[:, :, 0])
+        if np.min(melspec[:, :, 1]) < pmin:
+            pmin = np.min(melspec[:, :, 1])
 
     return (magmax, magmin, pmax, pmin)
 
