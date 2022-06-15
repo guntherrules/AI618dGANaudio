@@ -15,8 +15,8 @@ please download the dataset below
 
 # Subset of acoustic samples with pitches 24-84
 Train: https://gigamove.rwth-aachen.de/de/download/ab73c0f4f69034466ee92dd26dc19f2a <br>
-Test: <br>
-Validation: <br>
+Test: https://gigamove.rwth-aachen.de/de/download/f9fde68de48372411bd21dc837c35e8a <br>
+Validation: https://gigamove.rwth-aachen.de/de/download/5fb0244b129b09cc91969919f5bc26d6 <br>
 
 The above dataset has been created using `make_data_subset.py` on the unwrapped dataset while specifying the partition of data
 that the modules should be working on
